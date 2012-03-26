@@ -8,9 +8,11 @@ static IMP original_doCommandBySelector = nil;
 
 @implementation XCode4_beginning_of_line
 static void doCommandBySelector( id self_, SEL _cmd, SEL selector )
-{
-	
-    if (selector == @selector(moveToBeginningOfLine:) || selector == @selector(moveToBeginningOfLineAndModifySelection:))
+{	
+    if (selector == @selector(moveToBeginningOfLine:) || 
+		selector == @selector(moveToLeftEndOfLine:) ||
+		selector == @selector(moveToBeginningOfLineAndModifySelection:)
+		)
     {
         NSTextView *self = (NSTextView *)self_;
 		
@@ -44,13 +46,21 @@ static void doCommandBySelector( id self_, SEL _cmd, SEL selector )
     Class class = nil;
     Method originalMethod = nil;
     
+    NSLog(@"%@ initializing...", NSStringFromClass([self class]));
+    
     if (!(class = NSClassFromString(@"DVTSourceTextView")))
-        return;
+        goto failed;
     
     if (!(originalMethod = class_getInstanceMethod(class, @selector(doCommandBySelector:))))
-        return;
+        goto failed;
     
     if (!(original_doCommandBySelector = method_setImplementation(originalMethod, (IMP)&doCommandBySelector)))
-        return;
+        goto failed;
+    
+    NSLog(@"%@ complete!", NSStringFromClass([self class]));
+    return;
+    
+failed:
+    NSLog(@"%@ failed. :(", NSStringFromClass([self class]));
 }
 @end
