@@ -9,9 +9,11 @@ static IMP original_doCommandBySelector = nil;
 @implementation XCode4_beginning_of_line
 static void doCommandBySelector( id self_, SEL _cmd, SEL selector )
 {
-    if (selector == @selector(moveToBeginningOfLine:))
+	
+    if (selector == @selector(moveToBeginningOfLine:) || selector == @selector(moveToBeginningOfLineAndModifySelection:))
     {
         NSTextView *self = (NSTextView *)self_;
+		
         NSString *text = self.string;
         NSRange selectedRange = self.selectedRange;
         NSRange lineRange = [text lineRangeForRange:selectedRange];
@@ -24,7 +26,11 @@ static void doCommandBySelector( id self_, SEL _cmd, SEL selector )
                 NSUInteger caretLocation = selectedRange.location - lineRange.location;
                 if (caretLocation > codeStartRange.location || caretLocation == 0)
                 {
-                    [self setSelectedRange:NSMakeRange(lineRange.location + codeStartRange.location, 0)];
+					if (selector == @selector(moveToBeginningOfLineAndModifySelection:))
+						[self setSelectedRange:NSMakeRange(lineRange.location + codeStartRange.location, 
+							caretLocation - codeStartRange.location)];
+					else
+						[self setSelectedRange:NSMakeRange(lineRange.location + codeStartRange.location, 0)];
                     return;
                 }
             }
